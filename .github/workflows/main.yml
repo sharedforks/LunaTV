@@ -1,0 +1,51 @@
+# 工作流名称
+name: Upstream Sync
+
+# 权限设置，允许向仓库写入内容
+permissions:
+  contents: write
+
+# 触发条件
+on:
+  schedule:
+    # 每天 UTC 时间 0 点（北京时间早上 8 点）运行一次
+    - cron: "0 0 * * *"
+  # 允许手动触发
+  workflow_dispatch:
+
+# 任务
+jobs:
+  sync_latest_from_upstream:
+    name: Sync latest commits from upstream repo
+    runs-on: ubuntu-latest
+    # 确保只在 Fork 的仓库中运行
+    if: ${{ github.event.repository.fork }}
+
+    steps:
+      # 步骤 1: 检出你的仓库代码
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+
+      # 步骤 2: 与上游仓库同步
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+        with:
+          # (★★★ 修改点) 设置上游源仓库
+          upstream_sync_repo: SzeMeng76/LunaTV
+          # 上游仓库的分支
+          upstream_sync_branch: main
+          # 你自己仓库需要同步的目标分支
+          target_sync_branch: main
+          # 使用 GitHub 自动生成的令牌进行认证
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          # 关闭测试模式，实际执行同步
+          test_mode: false
+
+      # 步骤 3: 检查同步是否失败，并提供常见错误提示
+      - name: Sync check
+        if: failure()
+        run: |
+          echo "[错误] 由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次才能恢复。"
+          echo "[Error] The scheduled automatic update was suspended by GitHub due to a change in the upstream repository's workflow file. You need to manually sync your fork once to reactivate it."
+          exit 1
