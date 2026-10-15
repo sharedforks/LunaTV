@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps, no-console, @next/next/no-img-element, react-hooks/set-state-in-effect */
+/* eslint-disable react-hooks/exhaustive-deps, no-console, @next/next/no-img-element */
 
 'use client';
 
@@ -1741,7 +1741,7 @@ function LivePageClient() {
         }
       }),
 
-      /* 优化的 HLS Loader：直连模式 + 源标识 + 并发分片预取 */
+      /* HLS Loader：直连模式 + 源标识（基于 hls.js 顺序加载设计） */
       loader: class extends OptimizedHlsLoader {
         constructor(config: any) {
           super({
