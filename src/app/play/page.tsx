@@ -4429,7 +4429,12 @@ function PlayPageClient() {
             // 🚀 根据 HLS.js 官方源码的最佳实践配置
             const hls = new Hls({
               debug: false,
-              enableWorker: true,
+              // iOS Safari 已知 Web Worker + URL.createObjectURL(blob) 存在兼容问题
+              // 参考：https://github.com/video-dev/hls.js/issues/2064
+              enableWorker: !isIOSGlobal,
+              // iOS 17.1+ 优先使用 ManagedMediaSource 以获得更稳定的 MSE 体验
+              // 参考：https://developer.mozilla.org/en-US/docs/Web/API/ManagedMediaSource
+              preferManagedMediaSource: true,
               // 关闭低延迟模式以改善点播体验 - Issue #194
               // HLS.js 默认 lowLatencyMode: true，主要为 LL-HLS 直播流设计
               // 点播场景下会导致：缓冲区过小、网络波动时容易卡顿、CPU 负担增加

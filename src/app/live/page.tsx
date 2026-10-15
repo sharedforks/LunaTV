@@ -1671,10 +1671,14 @@ function LivePageClient() {
     // 基于最新 hls.js 源码和设备性能的智能配置
     const hlsConfig = {
       debug: false,
-      
+
       // Worker 配置 - 根据设备性能和浏览器能力
       enableWorker: !isMobile && !isSafari && devicePerformance !== 'low',
-      
+
+      // iOS 17.1+ 优先使用 ManagedMediaSource 以获得更稳定的 MSE 体验
+      // 参考：https://developer.mozilla.org/en-US/docs/Web/API/ManagedMediaSource
+      preferManagedMediaSource: true,
+
       // 低延迟模式 - 仅在高性能非移动设备上启用 (源码默认为true)
       lowLatencyMode: !isMobile && devicePerformance === 'high',
       
